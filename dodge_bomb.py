@@ -22,9 +22,9 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     画面内ならTrue, 画面外ならFalse
     """
     yoko, tate = True, True
-    if rct.left < 0 or WIDTH < rct.right:  #横はみだしチェック
+    if rct.left < 0 or WIDTH < rct.right:  # 横はみだしチェック
         yoko = False
-    if rct.top < 0 or HEIGHT < rct.bottom:  #縦はみだしチェック
+    if rct.top < 0 or HEIGHT < rct.bottom:  # 縦はみだしチェック
         tate = False
     return yoko, tate
 
@@ -45,8 +45,8 @@ def gameover(screen: pg.Surface) -> None:
     text_rct.center = WIDTH // 2, HEIGHT // 2
     
     cry_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 1.3)
-    cry_rct_left = cry_img.get_rect()  #泣いているこうかとん左
-    cry_rct_right = cry_img.get_rect()  #泣いているこうかとん右
+    cry_rct_left = cry_img.get_rect()  # 泣いているこうかとん左
+    cry_rct_right = cry_img.get_rect()  # 泣いているこうかとん右
     cry_rct_left.center = text_rct.left -50, HEIGHT // 2  #　場所調整
     cry_rct_right.center = text_rct.right +50, HEIGHT // 2  #　場所調整
     
@@ -67,12 +67,12 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     bb_imgs = []
     bb_accs = []
 
-    for r in range(1, 11):  #10段階
+    for r in range(1, 11):  # 10段階
         bb_img = pg.Surface((20 * r, 20 * r))
         pg.draw.circle(bb_img, (255, 0, 0), (10 * r, 10 * r), 10 * r)
         bb_imgs.append(bb_img)
         bb_img.set_colorkey((0, 0, 0))
-        bb_accs = [a for a in range(1, 11)]  #加速度のリスト
+        bb_accs = [a for a in range(1, 11)]  # 加速度のリスト
     return bb_imgs, bb_accs
 
 def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
@@ -145,10 +145,10 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
-    bb_img = pg.Surface((20,20))  #空のSurface
-    pg.draw.circle(bb_img, (255,0,0), (10,10), 10)  #円描写
-    bb_img.set_colorkey((0,0,0))  #背景透明
-    bb_rct = bb_img.get_rect()  #爆弾rct
+    bb_img = pg.Surface((20,20))  # 空のSurface
+    pg.draw.circle(bb_img, (255,0,0), (10,10), 10)  # 円描写
+    bb_img.set_colorkey((0,0,0))  # 背景透明
+    bb_rct = bb_img.get_rect()  # 爆弾rct
     bb_rct.centerx = random.randint(0, WIDTH)  # 爆弾横座標
     bb_rct.centery = random.randint(0, HEIGHT)  # 爆弾縦座標
     vx, vy = +5, +5
@@ -156,15 +156,15 @@ def main():
     clock = pg.time.Clock()
     tmr = 0
 
-    bb_imgs, bb_accs = init_bb_imgs()  #リスト所得
+    bb_imgs, bb_accs = init_bb_imgs()  # リスト所得
 
-    kk_imgs_dict = get_kk_imgs()  #辞書取得
+    kk_imgs_dict = get_kk_imgs()  # 辞書取得
 
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
-        if kk_rct.colliderect(bb_rct):  #こうかとんと爆弾が重なったら
+        if kk_rct.colliderect(bb_rct):  # こうかとんと爆弾が重なったら
             gameover(screen)
             return
         screen.blit(bg_img, [0, 0]) 
@@ -186,8 +186,8 @@ def main():
 
 
         kk_rct.move_ip(sum_mv)
-        if check_bound(kk_rct) != (True, True):  #画面外なら
-            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  #移動をなかったことにする
+        if check_bound(kk_rct) != (True, True):  # 画面外なら
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 移動をなかったことにする
         bb_rct.move_ip(vx, vy)
 
         # 追従爆弾の移動
