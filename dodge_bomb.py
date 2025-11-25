@@ -1,3 +1,4 @@
+import math
 import os
 import random
 import sys
@@ -76,7 +77,7 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
 
 def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
     """
-    引数:
+    引数:なし
     戻り値:こうかとんの移動方向に応じた画像Surfaceの辞書
     """
     kk_imgs = {}
@@ -92,6 +93,32 @@ def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
         (0, +5): pg.transform.rotozoom(pg.image.load("fig/3.png"), 180, 0.9),   # 下
         (+5, +5): pg.transform.rotozoom(pg.image.load("fig/3.png"), -135, 0.9)  # 右下
     }
+    return kk_dict
+
+def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    引数:org 爆弾Rect, dst こうかとんRect, current_xy 現在の移動方向
+    戻り値:正規化された方向ベクトル(vx, vy)
+    """
+    dx = dst.centerx - org.centerx
+    dy = dst.centery - org.centery
+    
+    # 距離を計算
+    distance = math.sqrt(dx**2 + dy**2)
+    
+    # 距離が300未満なら慣性で移動
+    if distance < 300:
+        return current_xy
+    
+    # ノルムが√50になるように正規化
+    if distance != 0:
+        norm = math.sqrt(50)
+        vx = dx / distance * norm
+        vy = dy / distance * norm
+        return vx, vy
+    
+    return current_xy
+
 
     # 画像ロード 
     kk_img_orig = pg.image.load("fig/3.png")
@@ -162,6 +189,9 @@ def main():
         if check_bound(kk_rct) != (True, True):  #画面外なら
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  #移動をなかったことにする
         bb_rct.move_ip(vx, vy)
+
+        # 追従爆弾の移動
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
 
         # 時間経過による爆弾の拡大と加速
         bb_img = bb_imgs[min(tmr // 500, 9)]
