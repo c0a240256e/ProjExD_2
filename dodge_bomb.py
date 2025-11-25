@@ -74,6 +74,42 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
         bb_accs = [a for a in range(1, 11)]  #加速度のリスト
     return bb_imgs, bb_accs
 
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    """
+    引数:
+    戻り値:こうかとんの移動方向に応じた画像Surfaceの辞書
+    """
+    kk_imgs = {}
+
+    kk_dict = {
+        (0, 0): pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9),      # 動かない
+        (+5, 0): pg.transform.rotozoom(pg.image.load("fig/3.png"), -90, 0.9),   # 右
+        (+5, -5): pg.transform.rotozoom(pg.image.load("fig/3.png"), -45, 0.9),  # 右上
+        (0, -5): pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9),     # 上
+        (-5, -5): pg.transform.rotozoom(pg.image.load("fig/3.png"), 45, 0.9),   # 左上
+        (-5, 0): pg.transform.rotozoom(pg.image.load("fig/3.png"), 90, 0.9),    # 左
+        (-5, +5): pg.transform.rotozoom(pg.image.load("fig/3.png"), 135, 0.9),  # 左下
+        (0, +5): pg.transform.rotozoom(pg.image.load("fig/3.png"), 180, 0.9),   # 下
+        (+5, +5): pg.transform.rotozoom(pg.image.load("fig/3.png"), -135, 0.9)  # 右下
+    }
+
+    # 画像ロード 
+    kk_img_orig = pg.image.load("fig/3.png")
+
+    # 移動方向ごとにrotozoomで回転
+    # (dx, dy): (横移動, 縦移動)
+    kk_imgs[(0, 0)] = pg.transform.rotozoom(kk_img_orig, 0, 0.9)     # 動かない
+    kk_imgs[(5, 0)] = pg.transform.rotozoom(kk_img_orig, -90, 0.9)   # 右
+    kk_imgs[(-5, 0)] = pg.transform.rotozoom(kk_img_orig, 90, 0.9)   # 左
+    kk_imgs[(0, -5)] = pg.transform.rotozoom(kk_img_orig, 0, 0.9)    # 上
+    kk_imgs[(0, 5)] = pg.transform.rotozoom(kk_img_orig, 180, 0.9)   # 下
+    kk_imgs[(5, -5)] = pg.transform.rotozoom(kk_img_orig, -45, 0.9)  # 右上
+    kk_imgs[(5, 5)] = pg.transform.rotozoom(kk_img_orig, -135, 0.9)  # 右下
+    kk_imgs[(-5, -5)] = pg.transform.rotozoom(kk_img_orig, 45, 0.9)  # 左上
+    kk_imgs[(-5, 5)] = pg.transform.rotozoom(kk_img_orig, 135, 0.9)  # 左下
+
+    return kk_imgs
+    
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -94,6 +130,9 @@ def main():
     tmr = 0
 
     bb_imgs, bb_accs = init_bb_imgs()  #リスト所得
+
+    kk_imgs_dict = get_kk_imgs()  #辞書取得
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -141,6 +180,10 @@ def main():
             vx *= -1
         if not tate:  # 縦方向に出ていたら
             vy *= -1
+
+        sum_mv_tuple = tuple(sum_mv)  
+        kk_img = kk_imgs_dict.get(sum_mv_tuple, kk_imgs_dict[(0, 0)])
+
         screen.blit(kk_img, kk_rct)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
