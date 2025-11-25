@@ -58,6 +58,23 @@ def gameover(screen: pg.Surface) -> None:
     time.sleep(5)
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    引数:なし
+    戻り値:爆弾Surfaceリストと加速度リストのタプル
+    """
+    bb_imgs = []
+    bb_accs = []
+
+    for r in range(1, 11):  #10段階
+        bb_img = pg.Surface((20 * r, 20 * r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10 * r, 10 * r), 10 * r)
+        bb_imgs.append(bb_img)
+        bb_img.set_colorkey((0, 0, 0))
+        bb_accs = [a for a in range(1, 11)]  #加速度のリスト
+    return bb_imgs, bb_accs
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -75,6 +92,8 @@ def main():
 
     clock = pg.time.Clock()
     tmr = 0
+
+    bb_imgs, bb_accs = init_bb_imgs()  #リスト所得
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -104,6 +123,19 @@ def main():
         if check_bound(kk_rct) != (True, True):  #画面外なら
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  #移動をなかったことにする
         bb_rct.move_ip(vx, vy)
+
+        # 時間経過による爆弾の拡大と加速
+        bb_img = bb_imgs[min(tmr // 500, 9)]
+        avx = vx * bb_accs[min(tmr // 500, 9)]
+        avy = vy * bb_accs[min(tmr // 500, 9)]
+        
+        # 爆弾のサイズ更新
+        bb_rct.width = bb_img.get_rect().width
+        bb_rct.height = bb_img.get_rect().height
+
+        # 移動
+        bb_rct.move_ip(avx, avy)
+
         yoko, tate = check_bound(bb_rct)
         if not yoko:  # 横方向に出ていたら
             vx *= -1
