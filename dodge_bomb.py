@@ -1,8 +1,8 @@
 import os
 import random
 import sys
+import time
 import pygame as pg
-
 
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +28,36 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     return yoko, tate
 
 
+def gameover(screen: pg.Surface) -> None:
+    """
+    引数:screen Surface
+    戻り値:なし
+    """
+    blackout = pg.Surface((WIDTH, HEIGHT))  # ブラックアウト用のSurface
+    blackout.fill((0, 0, 0))
+    blackout.set_alpha(128)  # 半透明
+    
+    # Game Over
+    font = pg.font.Font(None, 80)
+    text = font.render("Game Over", True, (255, 255, 255))
+    text_rct = text.get_rect()
+    text_rct.center = WIDTH // 2, HEIGHT // 2
+    
+    cry_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 1.3)
+    cry_rct_left = cry_img.get_rect()  #泣いているこうかとん左
+    cry_rct_right = cry_img.get_rect()  #泣いているこうかとん右
+    cry_rct_left.center = text_rct.left -50, HEIGHT // 2  #　場所調整
+    cry_rct_right.center = text_rct.right +50, HEIGHT // 2  #　場所調整
+    
+    # 画面に表示
+    screen.blit(blackout, (0, 0))
+    screen.blit(cry_img, cry_rct_left)
+    screen.blit(text, text_rct)
+    screen.blit(cry_img, cry_rct_right)
+    pg.display.update()
+    time.sleep(5)
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -50,7 +80,7 @@ def main():
             if event.type == pg.QUIT: 
                 return
         if kk_rct.colliderect(bb_rct):  #こうかとんと爆弾が重なったら
-            print("ゲームオーバー")
+            gameover(screen)
             return
         screen.blit(bg_img, [0, 0]) 
 
